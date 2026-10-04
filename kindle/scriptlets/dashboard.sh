@@ -3,36 +3,81 @@
 # Author: Jeanne
 # DontUseFBInk
 
-REFRESH_SECONDS=900
-START_HHMM=730
-END_HHMM=2200
+DASH_URL=http://192.168.18.26:8080/text.png
+REFRESH_SECONDS=300
+START_SECONDS=$((7 * 3600 + 30 * 60))
+END_SECONDS=$((22 * 3600))
 LOCAL_TZ="EST5EDT,M3.2.0,M11.1.0"
 PIDFILE=/tmp/home_console.pid
+
+refresh() {
+    tries=0
+    while [ $tries -lt 6 ]; do
+        if /usr/bin/wget -q -O /tmp/dash.png "$DASH_URL"; then
+            /usr/sbin/eips -g /tmp/dash.png
+            return
+        fi
+        tries=$((tries + 1))
+        sleep 5
+    done
+    /usr/sbin/eips 0 0 "WGET FAILED TO REACH PI"
+}
+
+seconds_until_next_wake() {
+    now=$(date +%s)
+    set -- $(TZ="$LOCAL_TZ" date "+%H %M %S")
+    seconds_of_day=$(( ${1#0} * 3600 + ${2#0} * 60 + ${3#0} ))
+    delta=$((REFRESH_SECONDS - now % REFRESH_SECONDS))
+    while true; do
+        wake_at=$(( (seconds_of_day + delta) % 86400 ))
+        if [ $wake_at -ge $START_SECONDS ] && [ $wake_at -le $END_SECONDS ]; then
+            echo $delta
+            return
+        fi
+        delta=$((delta + REFRESH_SECONDS))
+    done
+}
+
+find_rtc() {
+    for rtc in /sys/class/rtc/rtc*; do
+        if [ -e "$rtc/wakealarm" ]; then
+            echo "$rtc"
+            return
+        fi
+    done
+}
+
+suspend_for() {
+    target=$(( $(date +%s) + $1 ))
+    if [ -n "$RTC" ]; then
+        echo 0 > "$RTC/wakealarm"
+        echo "+$1" > "$RTC/wakealarm"
+        echo mem > /sys/power/state
+    fi
+    remaining=$(( target - $(date +%s) ))
+    if [ $remaining -gt 0 ]; then
+        sleep $remaining
+    fi
+}
+
+if [ "$1" = "--loop" ]; then
+    echo $$ > "$PIDFILE"
+    lipc-set-prop com.lab126.powerd preventScreenSaver 1
+    stop lab126_gui 2>/dev/null || stop framework 2>/dev/null
+    sleep 3
+    RTC=$(find_rtc)
+    while true; do
+        refresh
+        suspend_for "$(seconds_until_next_wake)"
+    done
+fi
 
 if [ -f "$PIDFILE" ]; then
     kill "$(cat "$PIDFILE")" 2>/dev/null
 fi
 
-refresh() {
-    /usr/bin/wget -O /tmp/dash.png http://192.168.18.26:8080/text.png
-    if [ $? -eq 0 ]; then
-        /usr/sbin/eips -g /tmp/dash.png
-    else
-        /usr/sbin/eips 0 0 "WGET FAILED TO REACH PI"
-    fi
-}
-
-(
-    lipc-set-prop com.lab126.powerd preventScreenSaver 1
-    sleep 3
-    refresh
-    while true; do
-        now=$(date +%s)
-        sleep $((REFRESH_SECONDS - now % REFRESH_SECONDS))
-        hhmm=$(TZ="$LOCAL_TZ" date +%H%M)
-        if [ "$hhmm" -ge "$START_HHMM" ] && [ "$hhmm" -le "$END_HHMM" ]; then
-            refresh
-        fi
-    done
-) &
-echo $! > "$PIDFILE"
+if command -v setsid >/dev/null 2>&1; then
+    setsid sh "$0" --loop >/dev/null 2>&1 &
+else
+    sh "$0" --loop >/dev/null 2>&1 &
+fi
