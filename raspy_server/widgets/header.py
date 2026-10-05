@@ -3,16 +3,18 @@ from PIL import ImageFont
 
 def draw(draw, x=0, y=0, max_width=None, max_height=None):
     try:
-        font = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf", 28)
+        font = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf", 44)
         updated_font = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf", 22)
     except IOError:
         font = ImageFont.load_default()
         updated_font = font
 
-    # Draw header text neatly within the slot coordinates
-    draw.text((x, y), "Kindle Dashboard", fill=0, font=font)
+    now = datetime.now()
+    day = now.day
+    suffix = "th" if 11 <= day <= 13 else {1: "st", 2: "nd", 3: "rd"}.get(day % 10, "th")
 
-    updated = f"Updated {datetime.now().strftime('%I:%M %p').lstrip('0')}"
-    bbox = draw.textbbox((0, 0), updated, font=updated_font)
-    updated_x = x + (max_width or 600) - (bbox[2] - bbox[0])
-    draw.text((updated_x, y + 4), updated, fill=0, font=updated_font)
+    # Draw header text neatly within the slot coordinates
+    draw.text((x, y + 44), f"{now.strftime('%A, %B')} {day}{suffix}", fill=0, font=font, anchor="ls")
+
+    updated = f"Updated {now.strftime('%I:%M %p').lstrip('0')}"
+    draw.text((x + (max_width or 600), y + 44), updated, fill=0, font=updated_font, anchor="rs")
