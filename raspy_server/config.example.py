@@ -9,3 +9,11 @@ ICLOUD_USER = "your-apple-id@icloud.com"
 ICLOUD_APP_PASSWORD = "xxxx-xxxx-xxxx-xxxx"
 # Calendar names exactly as they appear in the Calendar app; leave empty to show all
 CALENDAR_NAMES = ["Home", "Work"]
+
+# iCal links: Google Calendar secret addresses and subscribed calendars
+# Google: calendar.google.com > Settings > (pick a calendar) > Integrate calendar > Secret address in iCal format
+# Subscribed (Mac Calendar): right-click the calendar > Get Info > URL
+ICAL_URLS = [
+    "https://calendar.google.com/calendar/ical/.../private-.../basic.ics",
+    "webcal://example.com/subscribed.ics",
+]
