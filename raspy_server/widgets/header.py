@@ -3,8 +3,8 @@ from PIL import ImageFont
 
 def draw(draw, x=0, y=0, max_width=None, max_height=None):
     try:
-        font = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf", 44)
-        updated_font = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf", 22)
+        font = ImageFont.truetype("/usr/share/fonts/opentype/urw-base35/NimbusSans-Bold.otf", 44)
+        updated_font = ImageFont.truetype("/usr/share/fonts/opentype/urw-base35/NimbusSans-Regular.otf", 22)
     except IOError:
         font = ImageFont.load_default()
         updated_font = font
