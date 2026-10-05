@@ -10,10 +10,17 @@ END_SECONDS=$((22 * 3600))
 LOCAL_TZ="EST5EDT,M3.2.0,M11.1.0"
 PIDFILE=/tmp/home_console.pid
 
+battery_level() {
+    level=$(lipc-get-prop com.lab126.powerd battLevel 2>/dev/null)
+    [ -z "$level" ] && level=$(gasgauge-info -c 2>/dev/null)
+    [ -z "$level" ] && level=$(cat /sys/class/power_supply/*/capacity 2>/dev/null | head -n 1)
+    echo "$level" | tr -dc '0-9'
+}
+
 refresh() {
     tries=0
     while [ $tries -lt 6 ]; do
-        if /usr/bin/wget -q -O /tmp/dash.png "$DASH_URL"; then
+        if /usr/bin/wget -q -O /tmp/dash.png "$DASH_URL?battery=$(battery_level)"; then
             /usr/sbin/eips -g /tmp/dash.png
             return
         fi
