@@ -119,7 +119,8 @@ def draw(draw, x=0, y=0, max_width=None, max_height=None):
 
     try:
         w = fetch()
-    except Exception:
+    except Exception as e:
+        print(f"Weather fetch error: {type(e).__name__}: {e}", flush=True)
         draw.text((x + box_width / 2, y + box_height / 2), "Weather offline",
                   fill=0, font=condition_font, anchor="mm")
         return
@@ -128,18 +129,20 @@ def draw(draw, x=0, y=0, max_width=None, max_height=None):
     stats_left = x + box_width - 380
     stats_right = x + box_width - 30
 
-    # --- Current conditions: icon, temperature, label ---
+    # --- Current conditions: temperature and label left, icon in the middle ---
     top_mid = y + 140
+    col1_center = x + 200
+    icon_center = x + 500
     temp_text = f"{w['temp']:.1f}°"
-    temp_max_width = stats_left - 30 - (x + 260)
+    temp_max_width = 340
     temp_size = 120
     while temp_size > 60 and draw.textlength(temp_text, font=temp_font) > temp_max_width:
         temp_size -= 4
         temp_font = load_font(f"{DEJAVU}/DejaVuSans-Bold.ttf", temp_size)
-    draw.text((x + 130, top_mid), icon, fill=0, font=big_icon_font, anchor="mm")
-    draw.text((x + 260, top_mid - 20), temp_text, fill=0, font=temp_font, anchor="ls")
-    draw.text((x + 265, top_mid + 30), label, fill=0, font=condition_font, anchor="ls")
-    draw.text((x + 265, top_mid + 72), f"Feels like {w['feels']}°", fill=0, font=feels_font, anchor="ls")
+    draw.text((col1_center, top_mid - 20), temp_text, fill=0, font=temp_font, anchor="ms")
+    draw.text((col1_center, top_mid + 30), label, fill=0, font=condition_font, anchor="ms")
+    draw.text((col1_center, top_mid + 72), f"Feels like {w['feels']}°", fill=0, font=feels_font, anchor="ms")
+    draw.text((icon_center, top_mid), icon, fill=0, font=big_icon_font, anchor="mm")
 
     # --- Stats: icon, label left, value right ---
     stats = [
