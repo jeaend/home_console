@@ -3,7 +3,7 @@ import requests
 from datetime import datetime
 from PIL import ImageFont
 
-DEJAVU = "/usr/share/fonts/truetype/dejavu"
+FONT_DIR = "/usr/share/fonts/opentype/urw-base35"
 ICON_FONT = os.path.join(os.path.dirname(__file__), "..", "fonts", "weathericons-regular-webfont.ttf")
 
 URL = (
@@ -104,15 +104,15 @@ def fetch():
 def draw(draw, x=0, y=0, max_width=None, max_height=None):
     box_width = max_width or 600
     box_height = max_height or 440
-    draw.rectangle([x, y, x + box_width, y + box_height], outline=0, width=2)
+    draw.rounded_rectangle([x, y, x + box_width, y + box_height], radius=10, outline=0, width=2)
 
-    temp_font = load_font(f"{DEJAVU}/DejaVuSans-Bold.ttf", 120)
-    condition_font = load_font(f"{DEJAVU}/DejaVuSans-Bold.ttf", 36)
-    feels_font = load_font(f"{DEJAVU}/DejaVuSans.ttf", 28)
-    stat_label_font = load_font(f"{DEJAVU}/DejaVuSans.ttf", 26)
-    stat_value_font = load_font(f"{DEJAVU}/DejaVuSans-Bold.ttf", 26)
-    hour_font = load_font(f"{DEJAVU}/DejaVuSans.ttf", 24)
-    hour_temp_font = load_font(f"{DEJAVU}/DejaVuSans-Bold.ttf", 30)
+    temp_font = load_font(f"{FONT_DIR}/NimbusSans-Bold.otf", 120)
+    condition_font = load_font(f"{FONT_DIR}/NimbusSans-Bold.otf", 36)
+    feels_font = load_font(f"{FONT_DIR}/NimbusSans-Regular.otf", 28)
+    stat_label_font = load_font(f"{FONT_DIR}/NimbusSans-Regular.otf", 26)
+    stat_value_font = load_font(f"{FONT_DIR}/NimbusSans-Bold.otf", 26)
+    hour_font = load_font(f"{FONT_DIR}/NimbusSans-Regular.otf", 24)
+    hour_temp_font = load_font(f"{FONT_DIR}/NimbusSans-Bold.otf", 30)
     big_icon_font = load_font(ICON_FONT, 150)
     stat_icon_font = load_font(ICON_FONT, 30)
     hour_icon_font = load_font(ICON_FONT, 52)
@@ -138,7 +138,7 @@ def draw(draw, x=0, y=0, max_width=None, max_height=None):
     temp_size = 120
     while temp_size > 60 and draw.textlength(temp_text, font=temp_font) > temp_max_width:
         temp_size -= 4
-        temp_font = load_font(f"{DEJAVU}/DejaVuSans-Bold.ttf", temp_size)
+        temp_font = load_font(f"{FONT_DIR}/NimbusSans-Bold.otf", temp_size)
     draw.text((col1_center, top_mid - 20), temp_text, fill=0, font=temp_font, anchor="ms")
     draw.text((col1_center, top_mid + 30), label, fill=0, font=condition_font, anchor="ms")
     draw.text((col1_center, top_mid + 72), f"Feels like {w['feels']}°", fill=0, font=feels_font, anchor="ms")

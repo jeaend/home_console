@@ -1,6 +1,7 @@
 import imaplib
 import email
 from email.header import decode_header
+from email.utils import parsedate_to_datetime
 import json
 import os
 
@@ -63,9 +64,15 @@ def fetch_latest_email():
                 else:
                     sender = str(from_raw)
                     
+                try:
+                    received = parsedate_to_datetime(msg["Date"]).astimezone().isoformat()
+                except Exception:
+                    received = None
+
                 cache_data = {
                     "sender": sender,
-                    "subject": subject
+                    "subject": subject,
+                    "received": received
                 }
                 
                 with open("/tmp/latest_email.json", "w") as f:

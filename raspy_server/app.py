@@ -40,8 +40,8 @@ def serve_dashboard():
     current_y += 195
     
     # 4. Email Note Slot
-    email_note.draw(draw, x=margin, y=current_y, max_width=content_width, max_height=140)
-    current_y += 155
+    email_note.draw(draw, x=margin, y=current_y, max_width=content_width, max_height=570)
+    current_y += 585
 
     path = "/tmp/dashboard.png"
     img.save(path, "PNG")
