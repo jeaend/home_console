@@ -36,11 +36,11 @@ def serve_dashboard():
     current_y += 455
 
     # 3. Calendar Slot
-    calendar.draw(draw, x=margin, y=current_y, max_width=content_width, max_height=180)
-    current_y += 195
+    calendar.draw(draw, x=margin, y=current_y, max_width=content_width, max_height=250)
+    current_y += 265
     
     # 4. Email Note Slot
-    email_note.draw(draw, x=margin, y=current_y, max_width=content_width, max_height=570)
+    email_note.draw(draw, x=margin, y=current_y, max_width=content_width, max_height=HEIGHT - margin - current_y)
     current_y += 585
 
     path = "/tmp/dashboard.png"
