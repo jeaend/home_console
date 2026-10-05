@@ -1,7 +1,7 @@
 from flask import Flask, send_file
 from PIL import Image, ImageDraw
 
-from widgets import header, weather, calendar, email_note
+from widgets import header, weather, calendar, email_note, birthdays
 from utils.email_fetcher import fetch_latest_email
 
 app = Flask(__name__)
@@ -39,9 +39,14 @@ def serve_dashboard():
     calendar.draw(draw, x=margin, y=current_y, max_width=content_width, max_height=250)
     current_y += 265
     
-    # 4. Email Note Slot
-    email_note.draw(draw, x=margin, y=current_y, max_width=content_width, max_height=HEIGHT - margin - current_y)
-    current_y += 585
+    # 4. Birthdays Slot (left third)
+    birthdays_width = (content_width - 30) // 3
+    birthdays.draw(draw, x=margin, y=current_y, max_width=birthdays_width, max_height=210)
+    current_y += 225
+
+    # 5. Email Note Slot (pinned to the bottom)
+    email_note.draw(draw, x=margin, y=current_y, max_width=content_width,
+                    max_height=HEIGHT - margin - current_y, align_bottom=True)
 
     path = "/tmp/dashboard.png"
     img.save(path, "PNG")
