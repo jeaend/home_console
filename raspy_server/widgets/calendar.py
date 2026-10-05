@@ -57,9 +57,14 @@ def expand(calendar, start, end, tz):
 
 def fetch_events(start, end, tz):
     events = []
-    for url in getattr(config, "ICAL_URLS", []):
-        data = requests.get(url.replace("webcal://", "https://"), timeout=10).content
-        events += expand(icalendar.Calendar.from_ical(data), start, end, tz)
+    for n, url in enumerate(getattr(config, "ICAL_URLS", []), 1):
+        try:
+            response = requests.get(url.replace("webcal://", "https://"), timeout=10)
+            response.raise_for_status()
+            events += expand(icalendar.Calendar.from_ical(response.content), start, end, tz)
+        except Exception as e:
+            status = getattr(getattr(e, "response", None), "status_code", "")
+            print(f"Calendar link {n} failed: {type(e).__name__} {status}".rstrip(), flush=True)
 
     if getattr(config, "ICLOUD_USER", ""):
         client = caldav.DAVClient(url=ICLOUD_URL, username=config.ICLOUD_USER,

@@ -50,7 +50,7 @@ def signature(note):
     return ", ".join(p for p in parts if p)
 
 
-def draw(draw, x=0, y=0, max_width=None, max_height=None):
+def draw(draw, x=0, y=0, max_width=None, max_height=None, align_bottom=False):
     box_width = max_width or 600
     box_height = max_height or 140
     center_x = x + box_width / 2
@@ -73,6 +73,9 @@ def draw(draw, x=0, y=0, max_width=None, max_height=None):
         card_height = min(box_height, len(lines) * line_height + 2 * pad + sig_space)
     else:
         card_height = 120
+
+    if align_bottom:
+        y += box_height - card_height
 
     draw.rounded_rectangle([x, y, x + box_width, y + card_height], radius=10, outline=0, width=2)
 
