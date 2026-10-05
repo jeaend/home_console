@@ -1,4 +1,4 @@
-from flask import Flask, send_file
+from flask import Flask, request, send_file
 from PIL import Image, ImageDraw
 
 from widgets import header, weather, calendar, email_note, birthdays
@@ -28,7 +28,8 @@ def serve_dashboard():
     current_y = margin
     
     # 1. Header Slot
-    header.draw(draw, x=margin, y=current_y, max_width=content_width, max_height=100)
+    battery = request.args.get("battery", type=int)
+    header.draw(draw, x=margin, y=current_y, max_width=content_width, max_height=100, battery=battery)
     current_y += 120
     
     # 2. Weather Slot
