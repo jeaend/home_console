@@ -1,7 +1,7 @@
 from flask import Flask, request, send_file
 from PIL import Image, ImageDraw
 
-from widgets import header, weather, calendar, email_note, birthdays
+from widgets import header, weather, calendar, email_note, birthdays, reminders
 from utils.email_fetcher import fetch_latest_email
 
 app = Flask(__name__)
@@ -36,22 +36,37 @@ def serve_dashboard():
     weather.draw(draw, x=margin, y=current_y, max_width=content_width, max_height=440)
     current_y += 455
 
-    # 3. Calendar Slot
-    calendar.draw(draw, x=margin, y=current_y, max_width=content_width, max_height=250)
+    # 3. Calendar Slot (left three fifths)
+    calendar_width = (content_width - 30) * 3 // 5
+    calendar.draw(draw, x=margin, y=current_y, max_width=calendar_width, max_height=250)
+
+    # 4. Reminders Slot (right two fifths)
+    reminders_x = margin + calendar_width + 30
+    reminders.draw(draw, x=reminders_x, y=current_y, max_width=margin + content_width - reminders_x, max_height=250)
     current_y += 265
     
-    # 4. Birthdays Slot (left third)
+    # 5. Birthdays Slot (left third)
     birthdays_width = (content_width - 30) // 3
     birthdays.draw(draw, x=margin, y=current_y, max_width=birthdays_width, max_height=210)
+
+    # 6. Groceries Slot (right two thirds)
+    groceries_x = margin + birthdays_width + 30
+    reminders.draw_groceries(draw, x=groceries_x, y=current_y, max_width=margin + content_width - groceries_x, max_height=210)
     current_y += 225
 
-    # 5. Email Note Slot (pinned to the bottom)
+    # 7. Email Note Slot (pinned to the bottom)
     email_note.draw(draw, x=margin, y=current_y, max_width=content_width,
                     max_height=HEIGHT - margin - current_y, align_bottom=True)
 
     path = "/tmp/dashboard.png"
     img.save(path, "PNG")
     return send_file(path, mimetype="image/png")
+
+@app.route("/reminders", methods=["POST"])
+def receive_reminders():
+    payload = request.get_json(silent=True) or request.form.to_dict()
+    data = reminders.save(payload)
+    return {"saved": {name: len(items) for name, items in data["lists"].items()}}
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=8080)
