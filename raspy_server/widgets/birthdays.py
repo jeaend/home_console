@@ -115,12 +115,12 @@ def next_occurrence(person, today):
             return when
 
 
-def upcoming(people, today):
+def upcoming(people, today, count=COUNT):
     rows = []
     for person in people:
         when = next_occurrence(person, today)
         rows.append({"name": person["name"], "date": when, "days": (when - today).days})
-    return sorted(rows, key=lambda r: (r["days"], r["name"]))[:COUNT]
+    return sorted(rows, key=lambda r: (r["days"], r["name"]))[:count]
 
 
 def draw(draw, x=0, y=0, max_width=None, max_height=None):
@@ -184,7 +184,7 @@ def draw_strip(draw, x=0, y=0, max_width=None, max_height=None):
     if people is None:
         draw.text((text_x, row_y), "Offline", fill=0, font=name_font, anchor="lm")
         return
-    rows = upcoming(people, datetime.now().date())
+    rows = upcoming(people, datetime.now().date(), count=len(people))
     if not rows:
         draw.text((text_x, row_y), "None saved", fill=0, font=name_font, anchor="lm")
         return

@@ -51,8 +51,8 @@ def serve_dashboard():
     birthdays.draw_strip(draw, x=margin, y=birthdays_y, max_width=content_width, max_height=birthdays_height)
     column_bottom = birthdays_y - gap
 
-    # 5. Calendar Slot (left three fifths, stretches to fill)
-    left_width = (content_width - gap) * 3 // 5
+    # 5. Calendar Slot (left two thirds, stretches to fill)
+    left_width = (content_width - gap) * 2 // 3
     calendar_height = column_bottom - column_top - reminders_height - gap
     calendar.draw(draw, x=margin, y=current_y, max_width=left_width, max_height=calendar_height)
     current_y += calendar_height + gap
@@ -60,7 +60,7 @@ def serve_dashboard():
     # 6. Reminders Slot (left, under the calendar)
     reminders.draw(draw, x=margin, y=current_y, max_width=left_width, max_height=reminders_height)
 
-    # 7. Groceries Slot (right two fifths, full column height)
+    # 7. Groceries Slot (right third, full column height)
     groceries_x = margin + left_width + gap
     reminders.draw_groceries(draw, x=groceries_x, y=column_top, max_width=margin + content_width - groceries_x,
                              max_height=column_bottom - column_top)
