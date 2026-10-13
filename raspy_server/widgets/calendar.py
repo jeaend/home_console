@@ -16,7 +16,7 @@ except ImportError:
     config = None
 
 FONT_DIR = "/usr/share/fonts/opentype/urw-base35"
-EVENING_HOUR = 17
+DAYS_AHEAD = 14
 CACHE_SECONDS = 600
 ICLOUD_URL = "https://caldav.icloud.com"
 
@@ -47,7 +47,7 @@ def expand(calendar, start, end, tz):
         else:
             dtend = dtstart
         events.append({
-            "title": str(ev.get("SUMMARY", "")).strip() or "(No title)",
+            "title": " ".join(str(ev.get("SUMMARY", "")).split()) or "(No title)",
             "start": to_local(dtstart, tz),
             "end": to_local(dtend, tz),
             "all_day": not isinstance(dtstart, datetime),
@@ -94,15 +94,23 @@ def get_events(start, end, tz):
 
 def sections(events, now):
     today = now.date()
-    tomorrow = today + timedelta(days=1)
-    today_left = [e for e in events if e["start"].date() == today and (e["all_day"] or e["end"] > now)]
-    tomorrow_events = [e for e in events if e["start"].date() == tomorrow]
+    days = {}
+    for e in events:
+        day = e["start"].date()
+        if day < today or (day == today and not e["all_day"] and e["end"] <= now):
+            continue
+        days.setdefault(day, []).append(e)
 
-    if not today_left:
-        return [("Tomorrow", tomorrow_events)]
-    if now.hour >= EVENING_HOUR:
-        return [("Today", today_left), ("Tomorrow", tomorrow_events)]
-    return [("Today", today_left)]
+    result = []
+    for day in sorted(days):
+        if day == today:
+            label = "Today"
+        elif day == today + timedelta(days=1):
+            label = "Tomorrow"
+        else:
+            label = day.strftime("%a, %b %d").replace(" 0", " ")
+        result.append((label, days[day]))
+    return result or [("Upcoming", [])]
 
 
 def format_time(event):
@@ -128,7 +136,7 @@ def draw(draw, x=0, y=0, max_width=None, max_height=None):
     now = datetime.now().astimezone()
     tz = now.tzinfo
     day_start = now.replace(hour=0, minute=0, second=0, microsecond=0)
-    events = get_events(day_start, day_start + timedelta(days=2), tz)
+    events = get_events(day_start, day_start + timedelta(days=DAYS_AHEAD), tz)
 
     if events is None:
         draw.text((x + box_width / 2, y + box_height / 2), "Calendar offline", fill=0, font=message_font, anchor="mm")
@@ -149,11 +157,9 @@ def draw(draw, x=0, y=0, max_width=None, max_height=None):
             lines.append(("event", event))
 
     if len(lines) > max_lines:
-        hidden = sum(1 for kind, _ in lines[max_lines - 1:] if kind == "event")
-        lines = lines[:max_lines - 1]
+        lines = lines[:max_lines]
         if lines[-1][0] == "label":
             lines.pop()
-        lines.append(("more", f"+{hidden} more"))
 
     row_y = y + pad + line_height / 2
     for kind, value in lines:
