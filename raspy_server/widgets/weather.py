@@ -126,8 +126,6 @@ def draw(draw, x=0, y=0, max_width=None, max_height=None):
         return
 
     label, icon = condition(w["code"], w["is_day"])
-    stats_left = x + box_width - 380
-    stats_right = x + box_width - 30
 
     # --- Current conditions: temperature and label left, icon in the middle ---
     top_mid = y + 140
@@ -144,7 +142,7 @@ def draw(draw, x=0, y=0, max_width=None, max_height=None):
     draw.text((col1_center, top_mid + 72), f"Feels like {w['feels']}°", fill=0, font=feels_font, anchor="ms")
     draw.text((icon_center, top_mid), icon, fill=0, font=big_icon_font, anchor="mm")
 
-    # --- Stats: icon, label left, value right ---
+    # --- Stats: icon, label column, value column ---
     stats = [
         (ICON_THERMOMETER, "High / Low", f"{w['high']}° / {w['low']}°"),
         (ICON_UMBRELLA, "Rain", f"{w['rain']}%"),
@@ -152,11 +150,15 @@ def draw(draw, x=0, y=0, max_width=None, max_height=None):
         (ICON_SUNRISE, "Sunrise", w["sunrise"]),
         (ICON_SUNSET, "Sunset", w["sunset"]),
     ]
+    label_width = max(draw.textlength(s[1], font=stat_label_font) for s in stats)
+    value_width = max(draw.textlength(s[2], font=stat_value_font) for s in stats)
+    stats_left = x + box_width - 30 - (48 + label_width + 24 + value_width)
+    value_x = stats_left + 48 + label_width + 24
     row_y = y + 50
     for stat_icon, stat_label, value in stats:
         draw.text((stats_left + 18, row_y), stat_icon, fill=0, font=stat_icon_font, anchor="mm")
         draw.text((stats_left + 48, row_y), stat_label, fill=0, font=stat_label_font, anchor="lm")
-        draw.text((stats_right, row_y), value, fill=0, font=stat_value_font, anchor="rm")
+        draw.text((value_x, row_y), value, fill=0, font=stat_value_font, anchor="lm")
         row_y += 46
 
     divider_y = y + 285

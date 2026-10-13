@@ -160,3 +160,47 @@ def draw(draw, x=0, y=0, max_width=None, max_height=None):
         while draw.textlength(name, font=name_font) > name_width and len(name) > 1:
             name = name[:-2].rstrip() + "…"
         draw.text((x + pad + date_column, row_y), name, fill=0, font=name_font, anchor="lm")
+
+
+def draw_strip(draw, x=0, y=0, max_width=None, max_height=None):
+    box_width = max_width or 600
+    box_height = max_height or 80
+    draw.rounded_rectangle([x, y, x + box_width, y + box_height], radius=10, outline=0, width=2)
+
+    label_font = load_font(f"{FONT_DIR}/NimbusSans-Bold.otf", 24)
+    date_font = load_font(f"{FONT_DIR}/NimbusSans-Bold.otf", 26)
+    name_font = load_font(f"{FONT_DIR}/NimbusSans-Regular.otf", 26)
+
+    if not getattr(config, "ICLOUD_USER", ""):
+        return
+
+    pad = 28
+    row_y = y + box_height / 2
+    draw.text((x + pad, row_y), "BIRTHDAYS", fill=0, font=label_font, anchor="lm")
+    text_x = x + pad + draw.textlength("BIRTHDAYS", font=label_font) + 24
+    right = x + box_width - pad
+
+    people = get_people()
+    if people is None:
+        draw.text((text_x, row_y), "Offline", fill=0, font=name_font, anchor="lm")
+        return
+    rows = upcoming(people, datetime.now().date())
+    if not rows:
+        draw.text((text_x, row_y), "None saved", fill=0, font=name_font, anchor="lm")
+        return
+
+    sep = " · "
+    for i, row in enumerate(rows):
+        when = row["date"].strftime("%b %d").replace(" 0", " ") + " "
+        width = draw.textlength(when, font=date_font) + draw.textlength(row["name"], font=name_font)
+        if i:
+            width += draw.textlength(sep, font=name_font)
+        if text_x + width > right:
+            break
+        if i:
+            draw.text((text_x, row_y), sep, fill=0, font=name_font, anchor="lm")
+            text_x += draw.textlength(sep, font=name_font)
+        draw.text((text_x, row_y), when, fill=0, font=date_font, anchor="lm")
+        text_x += draw.textlength(when, font=date_font)
+        draw.text((text_x, row_y), row["name"], fill=0, font=name_font, anchor="lm")
+        text_x += draw.textlength(row["name"], font=name_font)

@@ -82,7 +82,7 @@ def draw(draw, x=0, y=0, max_width=None, max_height=None, align_bottom=False):
     if not text:
         empty_font = load_font(NOTE_FONT, 40)
         draw.text((center_x, y + card_height / 2), "No notes yet", fill=0, font=empty_font, anchor="mm")
-        return
+        return y
 
     text_area = card_height - 2 * pad - sig_space
     text_top = y + pad + (text_area - len(lines) * line_height) / 2
@@ -92,3 +92,4 @@ def draw(draw, x=0, y=0, max_width=None, max_height=None, align_bottom=False):
     sig = signature(note)
     if sig:
         draw.text((x + box_width - pad, y + card_height - pad), sig, fill=0, font=signature_font, anchor="rs")
+    return y

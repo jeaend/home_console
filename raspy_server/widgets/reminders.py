@@ -90,39 +90,23 @@ def draw_groceries(draw, x=0, y=0, max_width=None, max_height=None):
 
     pad = 28
     line_height = 38
-    text_x = x + pad
-    text_width = box_width - 2 * pad
+    item_width = box_width - 2 * pad
     row_y = y + pad + line_height / 2
     draw.text((x + pad, row_y), "GROCERIES", fill=0, font=label_font, anchor="lm")
-    first_y = row_y + line_height
-    rows = int((y + box_height - pad - (row_y + line_height / 2)) // line_height)
 
     data = load()
     if data is None:
-        draw.text((text_x, first_y), "No groceries yet", fill=0, font=item_font, anchor="lm")
+        draw.text((x + pad, row_y + line_height), "No groceries yet", fill=0, font=item_font, anchor="lm")
         return
     items = next((v for k, v in data.get("lists", {}).items() if k.startswith("grocer")), [])
     if not items:
-        draw.text((text_x, first_y), "Nothing needed", fill=0, font=item_font, anchor="lm")
+        draw.text((x + pad, row_y + line_height), "Nothing needed", fill=0, font=item_font, anchor="lm")
         return
 
-    sep = " · "
-    lines = [[]]
-    for item in items:
-        item = truncate(draw, item, item_font, text_width)
-        if lines[-1] and draw.textlength(sep.join(lines[-1] + [item]), font=item_font) > text_width:
-            lines.append([])
-        lines[-1].append(item)
-    if len(lines) > rows:
-        hidden = sum(len(line) for line in lines[rows:])
-        lines = lines[:rows]
-        while True:
-            more = f"+{hidden} more"
-            if draw.textlength(sep.join(lines[-1] + [more]), font=item_font) <= text_width or len(lines[-1]) == 1:
-                lines[-1].append(more)
-                break
-            lines[-1].pop()
-            hidden += 1
-
-    for i, line in enumerate(lines):
-        draw.text((text_x, first_y + i * line_height), sep.join(line), fill=0, font=item_font, anchor="lm")
+    rows = int((y + box_height - pad - (row_y + line_height / 2)) // line_height)
+    shown = items if len(items) <= rows else items[:rows - 1]
+    for item in shown:
+        row_y += line_height
+        draw.text((x + pad, row_y), truncate(draw, item, item_font, item_width), fill=0, font=item_font, anchor="lm")
+    if len(shown) < len(items):
+        draw.text((x + pad, row_y + line_height), f"+{len(items) - len(shown)} more", fill=0, font=item_font, anchor="lm")
