@@ -2,6 +2,8 @@
 
 An e-ink kitchen dashboard: a Raspberry Pi renders the day (weather, calendar, chores, groceries, birthdays and a note) as a 1072×1448 PNG, and a jailbroken Kindle fetches and displays it every 10 minutes.
 
+<img src="docs/preview.png" alt="Dashboard preview with sample data" width="420">
+
 ## Architecture
 
 ```text
