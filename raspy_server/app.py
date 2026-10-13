@@ -30,7 +30,7 @@ def serve_dashboard():
     
     # 1. Header Slot
     battery = request.args.get("battery", type=int)
-    header.draw(draw, x=margin, y=current_y, max_width=content_width, max_height=100, battery=battery)
+    header.draw(draw, x=margin + 12, y=current_y, max_width=content_width - 24, max_height=100, battery=battery)
     current_y += 68
     
     # 2. Weather Slot
